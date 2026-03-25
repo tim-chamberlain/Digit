@@ -31,17 +31,31 @@ struct SidebarView: View {
         .listStyle(.sidebar)
         .navigationTitle("Digit")
         .safeAreaInset(edge: .bottom) {
-            Button {
-                selection = .settings
-            } label: {
-                Label("Settings", systemImage: "gear")
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 10)
+            VStack(spacing: 0) {
+                Button {
+                    selection = .help
+                } label: {
+                    Label("Help", systemImage: "questionmark.circle")
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 10)
+                }
+                .buttonStyle(.plain)
+                .foregroundStyle(selection == .help ? Color.accentColor : .primary)
+                .background(selection == .help ? Color.accentColor.opacity(0.15) : Color.clear)
+
+                Button {
+                    selection = .settings
+                } label: {
+                    Label("Settings", systemImage: "gear")
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 10)
+                }
+                .buttonStyle(.plain)
+                .foregroundStyle(selection == .settings ? Color.accentColor : .primary)
+                .background(selection == .settings ? Color.accentColor.opacity(0.15) : Color.clear)
             }
-            .buttonStyle(.plain)
-            .foregroundStyle(selection == .settings ? Color.accentColor : .primary)
-            .background(selection == .settings ? Color.accentColor.opacity(0.15) : Color.clear)
         }
     }
 }

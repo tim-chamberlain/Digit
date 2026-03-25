@@ -24,6 +24,7 @@
 		AA10000F /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA00000F; };
 		AA100010 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AA000010; };
 		AA100011 /* DiscoveryService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000012; };
+		AA100013 /* HelpView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000013; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -45,6 +46,7 @@
 		AA000010 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		AA000011 /* Digit.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Digit.entitlements; sourceTree = "<group>"; };
 		AA000012 /* DiscoveryService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiscoveryService.swift; sourceTree = "<group>"; };
+		AA000013 /* HelpView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelpView.swift; sourceTree = "<group>"; };
 		DD000001 /* Digit.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Digit.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -112,6 +114,7 @@
 				AA00000D /* ComparisonCellView.swift */,
 				AA00000E /* CommitListView.swift */,
 				AA00000F /* SettingsView.swift */,
+				AA000013 /* HelpView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -212,6 +215,7 @@
 				AA10000E /* CommitListView.swift in Sources */,
 				AA10000F /* SettingsView.swift in Sources */,
 				AA100011 /* DiscoveryService.swift in Sources */,
+				AA100013 /* HelpView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -3,6 +3,18 @@ import SwiftUI
 enum SidebarItem: Hashable {
     case repo(UUID)
     case settings
+    case help
+}
+
+struct SidebarSelectionKey: FocusedValueKey {
+    typealias Value = Binding<SidebarItem?>
+}
+
+extension FocusedValues {
+    var sidebarSelection: Binding<SidebarItem?>? {
+        get { self[SidebarSelectionKey.self] }
+        set { self[SidebarSelectionKey.self] = newValue }
+    }
 }
 
 struct ContentView: View {
@@ -25,6 +37,8 @@ struct ContentView: View {
                 }
             case .settings:
                 SettingsView()
+            case .help:
+                HelpView()
             case nil:
                 VStack(spacing: 12) {
                     Image(systemName: "arrow.triangle.branch")
@@ -42,6 +56,7 @@ struct ContentView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
         }
+        .focusedSceneValue(\.sidebarSelection, $selection)
         .onChange(of: selection) { _, newValue in
             if case .repo(let id) = newValue,
                let repo = repoStore.repos.first(where: { $0.id == id }) {
