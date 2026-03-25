@@ -21,7 +21,9 @@ struct BranchRowView: View {
 
                 // Hide button
                 Button {
-                    viewModel.toggleBranchHidden(branch)
+                    withAnimation {
+                        viewModel.hideBranch(branch)
+                    }
                 } label: {
                     Image(systemName: "eye.slash")
                         .font(.caption2)
@@ -39,20 +41,36 @@ struct BranchRowView: View {
                     branchNameText
                 }
             }
-            .frame(width: 300, alignment: .leading)
+            .frame(width: viewModel.branchColumnWidth, alignment: .leading)
             .padding(.horizontal, 12)
             .padding(.vertical, 8)
 
+            Spacer().frame(width: 5) // match resize handle
+
+            // Author
+            Text(branch.author)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .lineLimit(1)
+                .frame(width: viewModel.authorColumnWidth, alignment: .leading)
+                .padding(.horizontal, 8)
+
+            Spacer().frame(width: 5) // match resize handle
+
             // Date range
             dateRangeView
-                .frame(width: 180, alignment: .leading)
+                .frame(width: viewModel.dateColumnWidth, alignment: .leading)
                 .padding(.horizontal, 8)
+
+            Spacer().frame(width: 5) // match resize handle
 
             // Comparison cells
             ForEach(viewModel.baseBranches, id: \.self) { base in
                 ComparisonCellView(branch: branch, baseBranch: base)
-                    .frame(width: 100)
+                    .frame(width: viewModel.baseColumnWidth)
                     .padding(.horizontal, 4)
+
+                Spacer().frame(width: 5) // match resize handle
             }
 
             Spacer(minLength: 0)

@@ -4,6 +4,7 @@ struct Branch: Identifiable, Hashable {
     var id: String { name }
     let name: String
     let commits: [Commit]
+    let author: String
 
     var displayName: String {
         name.replacingOccurrences(of: "remotes/origin/", with: "")

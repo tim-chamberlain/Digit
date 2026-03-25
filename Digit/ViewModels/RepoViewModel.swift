@@ -28,15 +28,29 @@ class RepoViewModel {
 
     // UI state
     var filterText: String = ""
+    var selectedFilterBranches: Set<String> = [] // branch names explicitly selected in filter
     var sortMode: SortMode = .alphabeticalAsc
     var hiddenBranches: Set<String> = []
     var expandedBranches: Set<String> = []
 
+    // Column widths
+    var branchColumnWidth: CGFloat = 300
+    var authorColumnWidth: CGFloat = 120
+    var dateColumnWidth: CGFloat = 180
+    var baseColumnWidth: CGFloat = 100
+
     private var gitService: GitService?
+    private var loadTask: Task<Void, Never>?
 
     var filteredBranches: [Branch] {
         var result = branches.filter { !hiddenBranches.contains($0.name) }
 
+        // If specific branches are selected, show only those
+        if !selectedFilterBranches.isEmpty {
+            result = result.filter { selectedFilterBranches.contains($0.name) }
+        }
+
+        // Text filter narrows further
         if !filterText.isEmpty {
             let terms = filterText.lowercased().components(separatedBy: " ").filter { !$0.isEmpty }
             result = result.filter { branch in
@@ -75,8 +89,15 @@ class RepoViewModel {
         gridEntries = [:]
         hiddenBranches = []
         expandedBranches = []
+        selectedFilterBranches = Set(config.filterBranches)
+        filterText = ""
         loadState = .idle
-        Task { await loadBranches() }
+        reloadBranches()
+    }
+
+    func reloadBranches() {
+        loadTask?.cancel()
+        loadTask = Task { await loadBranches() }
     }
 
     func loadBranches() async {
@@ -91,6 +112,7 @@ class RepoViewModel {
             var entries: [String: BranchGridEntry] = [:]
 
             for name in branchNames {
+                guard !Task.isCancelled else { return }
                 let entry = try await gitService.buildGridEntry(
                     branch: name,
                     baseBranches: repo.baseBranches,
@@ -101,14 +123,19 @@ class RepoViewModel {
 
                 // Build Branch from the grid entry commits
                 let commits = entry.commits.map(\.commit)
-                loadedBranches.append(Branch(name: name, commits: commits))
+                let primaryBase = "origin/\(repo.baseBranches.first ?? "main")"
+                let author = (try? await gitService.branchAuthor(name, base: primaryBase)) ?? "Unknown"
+                loadedBranches.append(Branch(name: name, commits: commits, author: author))
             }
 
+            guard !Task.isCancelled else { return }
             branches = loadedBranches
             gridEntries = entries
             loadState = .loaded
         } catch {
-            loadState = .error(error.localizedDescription)
+            if !Task.isCancelled {
+                loadState = .error(error.localizedDescription)
+            }
         }
     }
 
@@ -133,6 +160,32 @@ class RepoViewModel {
         } else {
             hiddenBranches.insert(branch.name)
         }
+    }
+
+    func hideBranch(_ branch: Branch) {
+        hiddenBranches.insert(branch.name)
+    }
+
+    func toggleFilterBranch(_ branch: Branch, repoStore: RepoStore) {
+        if selectedFilterBranches.contains(branch.name) {
+            selectedFilterBranches.remove(branch.name)
+        } else {
+            selectedFilterBranches.insert(branch.name)
+        }
+        persistFilterBranches(repoStore: repoStore)
+    }
+
+    func clearFilter(repoStore: RepoStore) {
+        filterText = ""
+        selectedFilterBranches.removeAll()
+        persistFilterBranches(repoStore: repoStore)
+    }
+
+    private func persistFilterBranches(repoStore: RepoStore) {
+        guard var config = repo else { return }
+        config.filterBranches = Array(selectedFilterBranches)
+        repo = config
+        repoStore.update(config)
     }
 
     func showAllBranches() {
@@ -167,6 +220,22 @@ class RepoViewModel {
 
     func gridEntry(for branch: Branch) -> BranchGridEntry? {
         gridEntries[branch.name]
+    }
+
+    func addBaseBranch(_ name: String, repoStore: RepoStore) {
+        guard var config = repo, !name.isEmpty, !config.baseBranches.contains(name) else { return }
+        config.baseBranches.append(name)
+        repoStore.update(config)
+        repo = config
+        reloadBranches()
+    }
+
+    func removeBaseBranch(_ name: String, repoStore: RepoStore) {
+        guard var config = repo else { return }
+        config.baseBranches.removeAll { $0 == name }
+        repoStore.update(config)
+        repo = config
+        reloadBranches()
     }
 
     func githubCompareURL(branch: Branch, base: String) -> URL? {

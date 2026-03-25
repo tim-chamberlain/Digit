@@ -75,6 +75,14 @@ actor GitService {
         return BranchGridEntry(branchName: branch, commits: commitsWithBases)
     }
 
+    /// Get the author of the earliest commit on the branch (branch creator)
+    func branchAuthor(_ branch: String, base: String) async throws -> String {
+        // Get the first commit on this branch that isn't in the base
+        let output = try await run("log", "\(base)..\(branch)", "--format=%an", "--reverse")
+        let lines = output.components(separatedBy: "\n").filter { !$0.isEmpty }
+        return lines.first ?? "Unknown"
+    }
+
     func latestCommitHash(_ branch: String) async throws -> String {
         let output = try await run("log", branch, "--format=%H", "-1")
         return output.trimmingCharacters(in: .whitespacesAndNewlines)
